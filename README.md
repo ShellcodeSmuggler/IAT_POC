@@ -2,11 +2,15 @@
 
 Find a suitable IAT based payload, that bypasses post DEP/ASLR protectsion in EMET. 
 
+
 ### Dependencies
 ```
 python2.7
 pefile
 ```
+
+# Warning
+*There is no exit function, you'll get a cmd shell back, but there will be a crash.  This was done by design - write your own exit function.*
 
 ### Examples:
 
