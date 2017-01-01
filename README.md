@@ -1,6 +1,6 @@
 # IAT_POC
 
-Find a suitable IAT based payload, that bypasses post DEP/ASLR protectsion in EMET. 
+Find a suitable IAT based payload, that bypasses post DEP/ASLR protections in EMET. 
 
 
 ### Dependencies
